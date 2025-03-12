@@ -12,25 +12,76 @@
   <div class="card text-center">
     <img src="assets/illustro/register.png" alt="Register Illustration" class="illustration">
     <h3 class="mb-4">Create Your Account</h3>
-    <form>
+    <form id="register-form">
       <div class="input-group mb-3">
         <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
-        <input type="text" class="form-control" placeholder="Full Name" required>
+        <input type="text" name="username" class="form-control" placeholder="Username" required>
       </div>
       <div class="input-group mb-3">
         <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
-        <input type="email" class="form-control" placeholder="Email" required>
+        <input type="email" name="email" class="form-control" placeholder="Email" required>
       </div>
       <div class="input-group mb-3">
         <span class="input-group-text bg-light"><i class="bi bi-lock"></i></span>
-        <input type="password" class="form-control" placeholder="Password" required>
+        <input type="password" name="password" class="form-control" placeholder="Password" required>
       </div>
-      <button class="btn btn-primary w-100">Register</button>
+      <button class="btn btn-primary w-100" id="register-button">
+        <span class="default-text">Register</span>
+        <span class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
+      </button>
       <div class="mt-3">
         Already have an account?
         <a href="login.html" class="text-link">Login</a>
       </div>
     </form>
   </div>
+
+  <script>
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const button = document.getElementById('register-button');
+      const defaultText = button.querySelector('.default-text');
+      const spinner = button.querySelector('.spinner-border');
+
+      const username = document.querySelector('input[name="username"]').value;
+      const email = document.querySelector('input[name="email"]').value;
+      const password = document.querySelector('input[name="password"]').value;
+
+      // Show spinner and disable button
+      button.disabled = true;
+      defaultText.classList.add('d-none');
+      spinner.classList.remove('d-none');
+
+      try {
+        const response = await fetch('http://localhost:8000/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: username,
+            email: email,
+            password: password
+          })
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+          showToast('Registration successful. Check your email for verification!', 'success');
+          sessionStorage.setItem('email', email);
+          window.location.href = 'verify_otp.html';
+        } else {
+          showToast(result.detail || 'Registration failed.', 'danger');
+        }
+      } catch (error) {
+        showToast(`An error occurred. ${error.message}`, 'danger');
+      } finally {
+        // Hide spinner and enable button
+        button.disabled = false;
+        defaultText.classList.remove('d-none');
+        spinner.classList.add('d-none');
+      }
+    });
+  </script>
+  <script src="assets/js/script.js"></script>
 </body>
 </html>

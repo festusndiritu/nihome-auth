@@ -9,19 +9,65 @@
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <div class="card">
+  <div class="card text-center">
     <img src="assets/illustro/otp.png" alt="Verify OTP Illustration" class="illustration">
     <h3 class="mb-4">Verify OTP</h3>
-    <form>
+    <form id="otp-form">
       <div class="input-group mb-3">
         <span class="input-group-text bg-light"><i class="bi bi-key"></i></span>
-        <input type="text" class="form-control" placeholder="Enter OTP" required>
+        <input type="text" name="otp" class="form-control" placeholder="Enter OTP" required>
       </div>
-      <button class="btn btn-primary w-100">Verify OTP</button>
-      <div class="mt-3">
-        <a href="forgot_password.html" class="text-link">Resend OTP</a>
-      </div>
+      <button class="btn btn-primary w-100" id="otp-button">
+        <span class="default-text">Verify OTP</span>
+        <span class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></span>
+      </button>
     </form>
   </div>
 </body>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const storedEmail = sessionStorage.getItem('email');
+    if (!storedEmail) {
+      window.location.href = 'login.html';
+    }
+  });
+
+  document.getElementById('otp-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const button = document.getElementById('otp-button');
+    const defaultText = button.querySelector('.default-text');
+    const spinner = button.querySelector('.spinner-border');
+    const otp = document.querySelector('input[name="otp"]').value;
+    const email = sessionStorage.getItem('email');
+
+    button.disabled = true;
+    defaultText.classList.add('d-none');
+    spinner.classList.remove('d-none');
+
+    try {
+      const response = await fetch('http://localhost:8000/auth/verify_otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ otp, email })
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        sessionStorage.setItem('token', result.token);
+        showToast('OTP verified successfully!', 'success');
+        window.location.href = 'index.html';
+      } else {
+        showToast(result.detail || 'Invalid OTP.', 'danger');
+      }
+    } catch (error) {
+      showToast(`An error occurred. ${error.message}`, 'danger');
+    } finally {
+      button.disabled = false;
+      defaultText.classList.remove('d-none');
+      spinner.classList.add('d-none');
+    }
+  });
+</script>
+<script src="assets/js/script.js"></script>
 </html>
