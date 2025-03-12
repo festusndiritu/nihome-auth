@@ -45,7 +45,7 @@ It also integrates with **Gmail API** to send OTP emails.
    ```
 
 4. **Set up environment variables:**
-   Create a `.env` file in the project root and add the following:
+   Create a `.env` file in api/app folder and add the following:
    ```env
    SECRET_KEY="your_secret_key"
    MONGO_URI="your_mongo_connection_string"
